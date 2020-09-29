@@ -30,14 +30,8 @@
         </dependency>
         <!-- 集成swagger2 -->
         <dependency>
-            <!-- 用于JSON API文档的生成 -->
             <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-        </dependency>
-        <dependency>
-            <!-- 用于文档界面展示 -->
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
+            <artifactId>springfox-boot-starter</artifactId>
         </dependency>
     </dependencies>
 </project>
