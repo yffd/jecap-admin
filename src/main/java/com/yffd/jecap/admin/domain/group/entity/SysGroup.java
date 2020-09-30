@@ -44,5 +44,8 @@ public class SysGroup implements IBaseEntity {
      */
     private String groupStatus;
 
-
+    public SysGroup(String groupName, String groupCode) {
+        this.groupName = groupName;
+        this.groupCode = groupCode;
+    }
 }

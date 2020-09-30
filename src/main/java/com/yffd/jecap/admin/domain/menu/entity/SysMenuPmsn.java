@@ -3,6 +3,7 @@ package com.yffd.jecap.admin.domain.menu.entity;
 import com.yffd.jecap.common.base.entity.IBaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
@@ -15,6 +16,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
+@NoArgsConstructor
 public class SysMenuPmsn implements IBaseEntity {
 
     private static final long serialVersionUID = 1L;
@@ -34,5 +36,8 @@ public class SysMenuPmsn implements IBaseEntity {
      */
     private String pmsnId;
 
-
+    public SysMenuPmsn(String menuId, String pmsnId) {
+        this.menuId = menuId;
+        this.pmsnId = pmsnId;
+    }
 }

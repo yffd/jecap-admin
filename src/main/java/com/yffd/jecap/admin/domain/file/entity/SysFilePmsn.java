@@ -3,6 +3,7 @@ package com.yffd.jecap.admin.domain.file.entity;
 import com.yffd.jecap.common.base.entity.IBaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
@@ -15,6 +16,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
+@NoArgsConstructor
 public class SysFilePmsn implements IBaseEntity {
 
     private static final long serialVersionUID = 1L;
@@ -34,5 +36,8 @@ public class SysFilePmsn implements IBaseEntity {
      */
     private String pmsnId;
 
-
+    public SysFilePmsn(String fileId, String pmsnId) {
+        this.fileId = fileId;
+        this.pmsnId = pmsnId;
+    }
 }

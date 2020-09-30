@@ -1,9 +1,8 @@
 package com.yffd.jecap.admin.domain.user.service;
 
 import com.yffd.jecap.admin.domain.user.entity.SysUserGroup;
-import com.yffd.jecap.admin.domain.user.repo.ISysUserGroupRepo;
-import com.yffd.jecap.common.base.repository.IBaseRepository;
-import com.yffd.jecap.common.base.service.AbstractBaseService;
+import com.yffd.jecap.admin.domain.user.repo.ISysUserRepo;
+import com.yffd.jecap.admin.infrastructure.dao.user.ISysUserGroupDao;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,12 +17,11 @@ import java.util.Set;
 
 @Slf4j
 @Service
-public class SysUserGroupService extends AbstractBaseService<SysUserGroup> {
-    @Autowired private ISysUserGroupRepo sysUserGroupRepo;
+public class SysUserGroupService {
+    @Autowired private ISysUserRepo userRepo;
 
-    @Override
-    protected IBaseRepository getRepo() {
-        return sysUserGroupRepo;
+    private ISysUserGroupDao getDao() {
+        return this.userRepo.getUserGroupDao();
     }
 
     /**
@@ -34,7 +32,7 @@ public class SysUserGroupService extends AbstractBaseService<SysUserGroup> {
     public Set<String> findUserIds(String groupId) {
         if (StringUtils.isBlank(groupId)) return Collections.emptySet();
         SysUserGroup entity = new SysUserGroup(null, groupId);
-        List<SysUserGroup> list = this.getRepo().getList(entity);
+        List<SysUserGroup> list = this.getDao().findList(entity);
         if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
         Set<String> ids = new HashSet<>();
         list.forEach(tmp -> ids.add(tmp.getUserId()));
@@ -49,7 +47,7 @@ public class SysUserGroupService extends AbstractBaseService<SysUserGroup> {
     public Set<String> findGroupIds(String userId) {
         if (StringUtils.isBlank(userId)) return Collections.emptySet();
         SysUserGroup entity = new SysUserGroup(userId, null);
-        List<SysUserGroup> list = this.getRepo().getList(entity);
+        List<SysUserGroup> list = this.getDao().findList(entity);
         if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
         Set<String> ids = new HashSet<>();
         list.forEach(tmp -> ids.add(tmp.getGroupId()));
@@ -77,8 +75,8 @@ public class SysUserGroupService extends AbstractBaseService<SysUserGroup> {
     public void addUserGroup(String userId, String groupId) {
         if (StringUtils.isAnyBlank(userId, groupId)) return;
         SysUserGroup entity = new SysUserGroup(userId, groupId);
-        if (null != this.getRepo().get(entity)) return;//已分配
-        this.getRepo().add(entity);
+        if (null != this.getDao().findOne(entity)) return;//已分配
+        this.getDao().addBy(entity);
     }
 
     /**
@@ -111,7 +109,7 @@ public class SysUserGroupService extends AbstractBaseService<SysUserGroup> {
     public void delBy(String userId, String groupId) {
         if (StringUtils.isAnyBlank(userId, groupId)) return;
         SysUserGroup entity = new SysUserGroup(userId, groupId);
-        this.getRepo().remove(entity);
+        this.getDao().removeBy(entity);
     }
 
     /**
@@ -120,7 +118,7 @@ public class SysUserGroupService extends AbstractBaseService<SysUserGroup> {
      */
     public void delByUserId(String userId) {
         if (StringUtils.isBlank(userId)) return;
-        this.getRepo().remove(new SysUserGroup(userId, null));
+        this.getDao().removeBy(new SysUserGroup(userId, null));
     }
 
     /**
@@ -129,7 +127,7 @@ public class SysUserGroupService extends AbstractBaseService<SysUserGroup> {
      */
     public void delByGroupId(String groupId) {
         if (StringUtils.isBlank(groupId)) return;
-        this.getRepo().remove(new SysUserGroup(null, groupId));
+        this.getDao().removeBy(new SysUserGroup(null, groupId));
     }
 
 }

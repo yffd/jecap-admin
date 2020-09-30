@@ -45,6 +45,11 @@ public class SysMenu implements IBaseEntity {
     private String menuShow;
 
     /**
+     * 菜单排序号
+     */
+    private String menuSn;
+
+    /**
      * 菜单图标
      */
     private String menuIcon;

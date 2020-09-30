@@ -102,5 +102,9 @@ public class SysUser implements IBaseEntity {
      */
     private LocalDateTime lastLoginTime;
 
-
+    public SysUser(String acntName, String acntPwd, String acntPwdSalt) {
+        this.acntName = acntName;
+        this.acntPwd = acntPwd;
+        this.acntPwdSalt = acntPwdSalt;
+    }
 }

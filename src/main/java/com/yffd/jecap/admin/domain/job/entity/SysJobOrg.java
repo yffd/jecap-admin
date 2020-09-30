@@ -3,6 +3,7 @@ package com.yffd.jecap.admin.domain.job.entity;
 import com.yffd.jecap.common.base.entity.IBaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
@@ -15,6 +16,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
+@NoArgsConstructor
 public class SysJobOrg implements IBaseEntity {
 
     private static final long serialVersionUID = 1L;
@@ -25,14 +27,17 @@ public class SysJobOrg implements IBaseEntity {
     private String id;
 
     /**
-     * 组织ID
-     */
-    private String orgId;
-
-    /**
      * 岗位ID
      */
     private String jobId;
 
+    /**
+     * 组织ID
+     */
+    private String orgId;
 
+    public SysJobOrg(String jobId, String orgId) {
+        this.jobId = jobId;
+        this.orgId = orgId;
+    }
 }

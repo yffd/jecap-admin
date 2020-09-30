@@ -2,8 +2,7 @@ package com.yffd.jecap.admin.domain.user.service;
 
 import com.yffd.jecap.admin.domain.user.entity.SysUserJob;
 import com.yffd.jecap.admin.domain.user.repo.ISysUserRepo;
-import com.yffd.jecap.common.base.repository.IBaseRepository;
-import com.yffd.jecap.common.base.service.AbstractBaseService;
+import com.yffd.jecap.admin.infrastructure.dao.user.ISysUserJobDao;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,12 +17,11 @@ import java.util.Set;
 
 @Slf4j
 @Service
-public class SysUserJobService extends AbstractBaseService<SysUserJob> {
-    @Autowired private ISysUserRepo sysUserRepo;
+public class SysUserJobService {
+    @Autowired private ISysUserRepo userRepo;
 
-    @Override
-    protected IBaseRepository getRepo() {
-        return sysUserRepo;
+    private ISysUserJobDao getDao() {
+        return this.userRepo.getUserJobDao();
     }
 
     /**
@@ -34,7 +32,7 @@ public class SysUserJobService extends AbstractBaseService<SysUserJob> {
     public Set<String> findUserIds(String jobId) {
         if (StringUtils.isBlank(jobId)) return Collections.emptySet();
         SysUserJob entity = new SysUserJob(null, jobId);
-        List<SysUserJob> list = this.getRepo().getList(entity);
+        List<SysUserJob> list = this.getDao().findList(entity);
         if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
         Set<String> ids = new HashSet<>();
         list.forEach(tmp -> ids.add(tmp.getUserId()));
@@ -49,7 +47,7 @@ public class SysUserJobService extends AbstractBaseService<SysUserJob> {
     public Set<String> findJobIds(String userId) {
         if (StringUtils.isBlank(userId)) return Collections.emptySet();
         SysUserJob entity = new SysUserJob(userId, null);
-        List<SysUserJob> list = this.getRepo().getList(entity);
+        List<SysUserJob> list = this.getDao().findList(entity);
         if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
         Set<String> ids = new HashSet<>();
         list.forEach(tmp -> ids.add(tmp.getJobId()));
@@ -77,8 +75,8 @@ public class SysUserJobService extends AbstractBaseService<SysUserJob> {
     public void addUserGroup(String userId, String jobId) {
         if (StringUtils.isAnyBlank(userId, jobId)) return;
         SysUserJob entity = new SysUserJob(userId, jobId);
-        if (null != this.getRepo().get(entity)) return;//已分配
-        this.getRepo().add(entity);
+        if (null != this.getDao().findOne(entity)) return;//已分配
+        this.getDao().addBy(entity);
     }
 
     /**
@@ -111,7 +109,7 @@ public class SysUserJobService extends AbstractBaseService<SysUserJob> {
     public void delBy(String userId, String jobId) {
         if (StringUtils.isAnyBlank(userId, jobId)) return;
         SysUserJob entity = new SysUserJob(userId, jobId);
-        this.getRepo().remove(entity);
+        this.getDao().removeBy(entity);
     }
 
     /**
@@ -120,7 +118,7 @@ public class SysUserJobService extends AbstractBaseService<SysUserJob> {
      */
     public void delByUserId(String userId) {
         if (StringUtils.isBlank(userId)) return;
-        this.getRepo().remove(new SysUserJob(userId, null));
+        this.getDao().removeBy(new SysUserJob(userId, null));
     }
 
     /**
@@ -129,6 +127,6 @@ public class SysUserJobService extends AbstractBaseService<SysUserJob> {
      */
     public void delByJobId(String jobId) {
         if (StringUtils.isBlank(jobId)) return;
-        this.getRepo().remove(new SysUserJob(null, jobId));
+        this.getDao().removeBy(new SysUserJob(null, jobId));
     }
 }

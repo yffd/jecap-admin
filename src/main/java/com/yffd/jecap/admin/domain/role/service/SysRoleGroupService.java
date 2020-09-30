@@ -1,9 +1,8 @@
 package com.yffd.jecap.admin.domain.role.service;
 
 import com.yffd.jecap.admin.domain.role.entity.SysRoleGroup;
-import com.yffd.jecap.admin.domain.role.repo.ISysRoleGroupRepo;
-import com.yffd.jecap.common.base.repository.IBaseRepository;
-import com.yffd.jecap.common.base.service.AbstractBaseService;
+import com.yffd.jecap.admin.domain.role.repo.ISysRoleRepo;
+import com.yffd.jecap.common.base.dao.IBaseDao;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,12 +15,11 @@ import java.util.List;
 import java.util.Set;
 
 @Service
-public class SysRoleGroupService extends AbstractBaseService<SysRoleGroup> {
-    @Autowired private ISysRoleGroupRepo sysRoleGroupRepo;
+public class SysRoleGroupService {
+    @Autowired private ISysRoleRepo sysRoleRepo;
 
-    @Override
-    protected IBaseRepository getRepo() {
-        return sysRoleGroupRepo;
+    private IBaseDao<SysRoleGroup> getDao() {
+        return sysRoleRepo.getRoleGroupDao();
     }
 
     /**
@@ -32,10 +30,10 @@ public class SysRoleGroupService extends AbstractBaseService<SysRoleGroup> {
     public Set<String> findRoleIds(String groupId) {
         if (StringUtils.isBlank(groupId)) return Collections.emptySet();
         SysRoleGroup entity = new SysRoleGroup(null, groupId);
-        List<SysRoleGroup> list = this.getRepo().getList(entity);
+        List<SysRoleGroup> list = this.getDao().findList(entity);
         if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
         Set<String> ids = new HashSet<>();
-        list.forEach(tmp -> ids.add(tmp.getGroupId()));
+        list.forEach(tmp -> ids.add(tmp.getRoleId()));
         return ids;
     }
 
@@ -47,10 +45,10 @@ public class SysRoleGroupService extends AbstractBaseService<SysRoleGroup> {
     public Set<String> findGroupIds(String roleId) {
         if (StringUtils.isBlank(roleId)) return Collections.emptySet();
         SysRoleGroup entity = new SysRoleGroup(roleId, null);
-        List<SysRoleGroup> list = this.getRepo().getList(entity);
+        List<SysRoleGroup> list = this.getDao().findList(entity);
         if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
         Set<String> ids = new HashSet<>();
-        list.forEach(tmp -> ids.add(tmp.getRoleId()));
+        list.forEach(tmp -> ids.add(tmp.getGroupId()));
         return ids;
     }
 
@@ -75,8 +73,8 @@ public class SysRoleGroupService extends AbstractBaseService<SysRoleGroup> {
     public void addRoleGroup(String roleId, String groupId) {
         if (StringUtils.isAnyBlank(roleId, groupId)) return;
         SysRoleGroup entity = new SysRoleGroup(roleId, groupId);
-        if (null != this.getRepo().get(entity)) return;//已分配
-        this.getRepo().add(entity);
+        if (null != this.getDao().findOne(entity)) return;//已分配
+        this.getDao().addBy(entity);
     }
 
     /**
@@ -92,13 +90,13 @@ public class SysRoleGroupService extends AbstractBaseService<SysRoleGroup> {
 
     /**
      * 添加关系
-     * @param groupIds
-     * @param roleId
+     * @param roleIds
+     * @param groupId
      */
     @Transactional
-    public void addRoleGroup(Set<String> groupIds, String roleId) {
-        if (CollectionUtils.isEmpty(groupIds)) return;
-        groupIds.forEach(groupId -> this.addRoleGroup(groupId, roleId));
+    public void addRoleGroup(Set<String> roleIds, String groupId) {
+        if (CollectionUtils.isEmpty(roleIds)) return;
+        roleIds.forEach(tmp -> this.addRoleGroup(tmp, groupId));
     }
 
     /**
@@ -109,7 +107,7 @@ public class SysRoleGroupService extends AbstractBaseService<SysRoleGroup> {
     public void delBy(String roleId, String groupId) {
         if (StringUtils.isAnyBlank(roleId, groupId)) return;
         SysRoleGroup entity = new SysRoleGroup(roleId, groupId);
-        this.getRepo().remove(entity);
+        this.getDao().removeBy(entity);
     }
 
     /**
@@ -118,7 +116,7 @@ public class SysRoleGroupService extends AbstractBaseService<SysRoleGroup> {
      */
     public void delByRoleId(String roleId) {
         if (StringUtils.isBlank(roleId)) return;
-        this.getRepo().remove(new SysRoleGroup(roleId, null));
+        this.getDao().removeBy(new SysRoleGroup(roleId, null));
     }
 
     /**
@@ -127,7 +125,7 @@ public class SysRoleGroupService extends AbstractBaseService<SysRoleGroup> {
      */
     public void delByGroupId(String groupId) {
         if (StringUtils.isBlank(groupId)) return;
-        this.getRepo().remove(new SysRoleGroup(null, groupId));
+        this.getDao().removeBy(new SysRoleGroup(null, groupId));
     }
 
 }

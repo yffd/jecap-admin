@@ -4,9 +4,8 @@ import com.yffd.jecap.admin.domain.constant.AdminConsts;
 import com.yffd.jecap.admin.domain.exception.AdminException;
 import com.yffd.jecap.admin.domain.user.entity.SysUser;
 import com.yffd.jecap.admin.domain.user.repo.ISysUserRepo;
+import com.yffd.jecap.admin.infrastructure.dao.user.ISysUserDao;
 import com.yffd.jecap.common.base.exception.DataExistException;
-import com.yffd.jecap.common.base.repository.IBaseRepository;
-import com.yffd.jecap.common.base.service.AbstractBaseService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,36 +18,32 @@ import java.util.Base64;
 
 @Slf4j
 @Service
-public class SysUserService extends AbstractBaseService<SysUser> {
+public class SysUserService {
+    @Autowired private ISysUserRepo userRepo;
 
-    @Autowired private ISysUserRepo sysUserRepo;
-    @Override
-    protected IBaseRepository getRepo() {
-        return sysUserRepo;
+    private ISysUserDao getDao() {
+        return this.userRepo.getUserDao();
     }
 
     /**
      * 添加新用户
-     * @param entity
+     * @param user
      */
-    @Override
-    public int addBy(SysUser entity) {
-        if (null == entity || StringUtils.isBlank(entity.getAcntName())) throw AdminException.cast("【账号名称】不能为空").prompt();
-        if (this.existByAcntName(entity.getAcntName())) throw DataExistException.cast("【账号名称】已存在");
-        return this.getRepo().add(entity);
+    public void add(SysUser user) {
+        if (null == user || StringUtils.isBlank(user.getAcntName())) throw AdminException.cast("【账号名称】不能为空").prompt();
+        if (this.existByAcntName(user.getAcntName())) throw DataExistException.cast("【账号名称】已存在");
+        this.getDao().addBy(user);
     }
 
     /**
      * 删除用户
      * @param id
-     * @return
      */
-    @Override
-    public int deleteById(Serializable id) {
-        if (null == id) return 0;
+    public void deleteById(Serializable id) {
+        if (null == id) return;
         SysUser entity = new SysUser();
         entity.setId(id.toString());
-        return this.deleteById(entity);
+        this.deleteById(entity);
     }
 
     /**
@@ -59,7 +54,7 @@ public class SysUserService extends AbstractBaseService<SysUser> {
     public SysUser findByAcntName(String acntName) {
         SysUser entity = new SysUser();
         entity.setAcntName(acntName);
-        return this.findBy(entity);
+        return this.getDao().findOne(entity);
     }
 
     /**
@@ -80,7 +75,7 @@ public class SysUserService extends AbstractBaseService<SysUser> {
         SysUser entity = new SysUser();
         entity.setId(userId);
         entity.setAcntStatus(AdminConsts.DEF_DISABLED);
-        this.updateById(entity);
+        this.getDao().modifyById(entity);
     }
 
     /**
@@ -92,7 +87,7 @@ public class SysUserService extends AbstractBaseService<SysUser> {
         SysUser entity = new SysUser();
         entity.setId(userId);
         entity.setAcntStatus(AdminConsts.DEF_ENABLED);
-        this.updateById(entity);
+        this.getDao().modifyById(entity);
     }
 
     public void encryptUser(SysUser entity) {
