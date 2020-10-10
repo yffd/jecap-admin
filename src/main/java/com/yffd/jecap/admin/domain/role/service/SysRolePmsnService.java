@@ -16,10 +16,10 @@ import java.util.Set;
 
 @Service
 public class SysRolePmsnService {
-    @Autowired private ISysRoleRepo sysRoleRepo;
+    @Autowired private ISysRoleRepo roleRepo;
 
     private IBaseDao<SysRolePmsn> getDao() {
-        return sysRoleRepo.getRolePmsnDao();
+        return roleRepo.getRolePmsnDao();
     }
 
     /**
@@ -27,9 +27,9 @@ public class SysRolePmsnService {
      * @param pmsnId
      * @return
      */
-    public Set<String> findRoleIds(String pmsnId) {
+    public Set<String> queryRoleIds(String pmsnId) {
         if (StringUtils.isBlank(pmsnId)) return Collections.emptySet();
-        List<SysRolePmsn> list = this.getDao().findList(new SysRolePmsn(null, pmsnId));
+        List<SysRolePmsn> list = this.getDao().queryList(new SysRolePmsn(null, pmsnId));
         if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
         Set<String> ids = new HashSet<>();
         list.forEach(tmp -> ids.add(tmp.getRoleId()));
@@ -41,9 +41,9 @@ public class SysRolePmsnService {
      * @param roleId
      * @return
      */
-    public Set<String> findPmsnIds(String roleId) {
+    public Set<String> queryPmsnIds(String roleId) {
         if (StringUtils.isBlank(roleId)) return Collections.emptySet();
-        List<SysRolePmsn> list = this.getDao().findList(new SysRolePmsn(roleId, null));
+        List<SysRolePmsn> list = this.getDao().queryList(new SysRolePmsn(roleId, null));
         if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
         Set<String> ids = new HashSet<>();
         list.forEach(tmp -> ids.add(tmp.getPmsnId()));
@@ -71,7 +71,7 @@ public class SysRolePmsnService {
     public void addRolePmsn(String roleId, String pmsnId) {
         if (StringUtils.isAnyBlank(roleId, pmsnId)) return;
         SysRolePmsn entity = new SysRolePmsn(roleId, pmsnId);
-        if (null != this.getDao().findOne(entity)) return;//已分配
+        if (null != this.getDao().queryOne(entity)) return;//已分配
         this.getDao().addBy(entity);
     }
 
@@ -105,6 +105,16 @@ public class SysRolePmsnService {
     public void delBy(String roleId, String pmsnId) {
         if (StringUtils.isAnyBlank(roleId, pmsnId)) return;
         this.getDao().removeBy(new SysRolePmsn(roleId, pmsnId));
+    }
+
+    /**
+     * 删除关系
+     * @param roleId
+     * @param pmsnIds
+     */
+    public void delBy(String roleId, Set<String> pmsnIds) {
+        if (StringUtils.isBlank(roleId) || CollectionUtils.isEmpty(pmsnIds)) return;
+        this.roleRepo.removePmsn(roleId, pmsnIds);
     }
 
     /**

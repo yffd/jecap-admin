@@ -11,5 +11,5 @@ public interface ISysAreaRepo {
     IBaseDao<SysArea> getAreaDao();
     IBaseDao<SysAreaAddress> getAreaAddressDao();
 
-    List<SysArea> findByPath(String path);
+    List<SysArea> queryByPath(String path);
 }

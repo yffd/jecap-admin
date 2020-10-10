@@ -39,5 +39,9 @@ public class SysPmsn implements IBaseEntity {
      */
     private String pmsnStatus;
 
-
+    public SysPmsn(String pmsnName, String pmsnType, String pmsnStatus) {
+        this.pmsnName = pmsnName;
+        this.pmsnType = pmsnType;
+        this.pmsnStatus = pmsnStatus;
+    }
 }

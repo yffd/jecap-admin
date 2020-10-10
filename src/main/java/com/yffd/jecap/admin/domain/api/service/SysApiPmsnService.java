@@ -23,47 +23,6 @@ public class SysApiPmsnService {
     }
 
     /**
-     * 查找关系
-     * @param pmsnId
-     * @return
-     */
-    public Set<String> findApiIds(String pmsnId) {
-        if (StringUtils.isBlank(pmsnId)) return Collections.emptySet();
-        List<SysApiPmsn> list = this.getDao().findList(new SysApiPmsn(null, pmsnId));
-        if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
-        Set<String> ids = new HashSet<>();
-        list.forEach(tmp -> ids.add(tmp.getApiId()));
-        return ids;
-    }
-
-    /**
-     * 查找关系
-     * @param apiId
-     * @return
-     */
-    public Set<String> findPmsnIds(String apiId) {
-        if (StringUtils.isBlank(apiId)) return Collections.emptySet();
-        List<SysApiPmsn> list = this.getDao().findList(new SysApiPmsn(apiId, null));
-        if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
-        Set<String> ids = new HashSet<>();
-        list.forEach(tmp -> ids.add(tmp.getPmsnId()));
-        return ids;
-    }
-
-    /**
-     * 添加或解除关系
-     * @param apiId
-     * @param addPmsnIds
-     * @param delPmsnIds
-     */
-    @Transactional
-    public void addAndDel(String apiId, Set<String> addPmsnIds, Set<String> delPmsnIds) {
-        if (StringUtils.isBlank(apiId)) return;
-        if (CollectionUtils.isNotEmpty(delPmsnIds)) delPmsnIds.forEach(tmp -> this.delBy(apiId, tmp));
-        if (CollectionUtils.isNotEmpty(addPmsnIds)) addPmsnIds.forEach(tmp -> this.addRlt(apiId, tmp));
-    }
-
-    /**
      * 添加关系
      * @param apiId
      * @param pmsnId
@@ -71,7 +30,7 @@ public class SysApiPmsnService {
     public void addRlt(String apiId, String pmsnId) {
         if (StringUtils.isAnyBlank(apiId, pmsnId)) return;
         SysApiPmsn entity = new SysApiPmsn(apiId, pmsnId);
-        if (null != this.getDao().findOne(entity)) return;//已分配
+        if (null != this.getDao().queryOne(entity)) return;//已分配
         this.getDao().addBy(entity);
     }
 
@@ -98,11 +57,24 @@ public class SysApiPmsnService {
     }
 
     /**
+     * 更新关系
+     * @param apiId
+     * @param addPmsnIds
+     * @param delPmsnIds
+     */
+    @Transactional
+    public void updateRlt(String apiId, Set<String> addPmsnIds, Set<String> delPmsnIds) {
+        if (StringUtils.isBlank(apiId)) return;
+        if (CollectionUtils.isNotEmpty(delPmsnIds)) delPmsnIds.forEach(tmp -> this.deleteBy(apiId, tmp));
+        if (CollectionUtils.isNotEmpty(addPmsnIds)) addPmsnIds.forEach(tmp -> this.addRlt(apiId, tmp));
+    }
+
+    /**
      * 删除关系
      * @param apiId
      * @param pmsnId
      */
-    public void delBy(String apiId, String pmsnId) {
+    public void deleteBy(String apiId, String pmsnId) {
         if (StringUtils.isAnyBlank(apiId, pmsnId)) return;
         this.getDao().removeBy(new SysApiPmsn(apiId, pmsnId));
     }
@@ -111,7 +83,7 @@ public class SysApiPmsnService {
      * 删除关系
      * @param apiId
      */
-    public void delByApiId(String apiId) {
+    public void deleteByApiId(String apiId) {
         if (StringUtils.isBlank(apiId)) return;
         this.getDao().removeBy(new SysApiPmsn(apiId, null));
     }
@@ -120,9 +92,49 @@ public class SysApiPmsnService {
      * 删除关系
      * @param pmsnId
      */
-    public void delByPmsnId(String pmsnId) {
+    public void deleteByPmsnId(String pmsnId) {
         if (StringUtils.isBlank(pmsnId)) return;
         this.getDao().removeBy(new SysApiPmsn(null, pmsnId));
     }
+
+    /**
+     * 查找关系
+     * @param pmsnId
+     * @return
+     */
+    public Set<String> queryApiIds(String pmsnId) {
+        if (StringUtils.isBlank(pmsnId)) return Collections.emptySet();
+        List<SysApiPmsn> list = this.getDao().queryList(new SysApiPmsn(null, pmsnId));
+        if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
+        Set<String> ids = new HashSet<>();
+        list.forEach(tmp -> ids.add(tmp.getApiId()));
+        return ids;
+    }
+
+    /**
+     * 查找关系
+     * @param apiId
+     * @return
+     */
+    public Set<String> queryPmsnIds(String apiId) {
+        if (StringUtils.isBlank(apiId)) return Collections.emptySet();
+        List<SysApiPmsn> list = this.getDao().queryList(new SysApiPmsn(apiId, null));
+        if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
+        Set<String> ids = new HashSet<>();
+        list.forEach(tmp -> ids.add(tmp.getPmsnId()));
+        return ids;
+    }
+
+    /**
+     * 查找关系
+     * @param apiId
+     * @return
+     */
+    public SysApiPmsn queryByApiId(String apiId) {
+        if (StringUtils.isBlank(apiId)) return null;
+        return this.getDao().queryOne(new SysApiPmsn(apiId, null));
+    }
+
+
 
 }

@@ -5,6 +5,8 @@ import com.yffd.jecap.admin.infrastructure.dao.user.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.Set;
+
 @Repository
 public class SysUserRepo implements ISysUserRepo {
     @Autowired private ISysUserDao userDao;
@@ -36,6 +38,21 @@ public class SysUserRepo implements ISysUserRepo {
     @Override
     public ISysUserLoginDao getUserLoginDao() {
         return userLoginDao;
+    }
+
+    @Override
+    public void removeRole(String userId, Set<String> roleIds) {
+
+    }
+
+    @Override
+    public void removeGroup(String userId, Set<String> groupIds) {
+
+    }
+
+    @Override
+    public void removeJob(String userId, Set<String> jobIds) {
+
     }
 
 }

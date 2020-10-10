@@ -29,10 +29,10 @@ public class SysUserGroupService {
      * @param groupId
      * @return
      */
-    public Set<String> findUserIds(String groupId) {
+    public Set<String> queryUserIds(String groupId) {
         if (StringUtils.isBlank(groupId)) return Collections.emptySet();
         SysUserGroup entity = new SysUserGroup(null, groupId);
-        List<SysUserGroup> list = this.getDao().findList(entity);
+        List<SysUserGroup> list = this.getDao().queryList(entity);
         if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
         Set<String> ids = new HashSet<>();
         list.forEach(tmp -> ids.add(tmp.getUserId()));
@@ -44,10 +44,10 @@ public class SysUserGroupService {
      * @param userId
      * @return
      */
-    public Set<String> findGroupIds(String userId) {
+    public Set<String> queryGroupIds(String userId) {
         if (StringUtils.isBlank(userId)) return Collections.emptySet();
         SysUserGroup entity = new SysUserGroup(userId, null);
-        List<SysUserGroup> list = this.getDao().findList(entity);
+        List<SysUserGroup> list = this.getDao().queryList(entity);
         if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
         Set<String> ids = new HashSet<>();
         list.forEach(tmp -> ids.add(tmp.getGroupId()));
@@ -75,7 +75,7 @@ public class SysUserGroupService {
     public void addUserGroup(String userId, String groupId) {
         if (StringUtils.isAnyBlank(userId, groupId)) return;
         SysUserGroup entity = new SysUserGroup(userId, groupId);
-        if (null != this.getDao().findOne(entity)) return;//已分配
+        if (null != this.getDao().queryOne(entity)) return;//已分配
         this.getDao().addBy(entity);
     }
 
@@ -110,6 +110,16 @@ public class SysUserGroupService {
         if (StringUtils.isAnyBlank(userId, groupId)) return;
         SysUserGroup entity = new SysUserGroup(userId, groupId);
         this.getDao().removeBy(entity);
+    }
+
+    /**
+     * 删除关系
+     * @param userId
+     * @param groupIds
+     */
+    public void delBy(String userId, Set<String> groupIds) {
+        if (StringUtils.isBlank(userId) || CollectionUtils.isEmpty(groupIds)) return;
+        this.userRepo.removeGroup(userId, groupIds);
     }
 
     /**

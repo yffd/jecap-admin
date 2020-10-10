@@ -16,10 +16,10 @@ import java.util.Set;
 
 @Service
 public class SysRoleGroupService {
-    @Autowired private ISysRoleRepo sysRoleRepo;
+    @Autowired private ISysRoleRepo roleRepo;
 
     private IBaseDao<SysRoleGroup> getDao() {
-        return sysRoleRepo.getRoleGroupDao();
+        return roleRepo.getRoleGroupDao();
     }
 
     /**
@@ -27,10 +27,10 @@ public class SysRoleGroupService {
      * @param groupId
      * @return
      */
-    public Set<String> findRoleIds(String groupId) {
+    public Set<String> queryRoleIds(String groupId) {
         if (StringUtils.isBlank(groupId)) return Collections.emptySet();
         SysRoleGroup entity = new SysRoleGroup(null, groupId);
-        List<SysRoleGroup> list = this.getDao().findList(entity);
+        List<SysRoleGroup> list = this.getDao().queryList(entity);
         if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
         Set<String> ids = new HashSet<>();
         list.forEach(tmp -> ids.add(tmp.getRoleId()));
@@ -42,10 +42,10 @@ public class SysRoleGroupService {
      * @param roleId
      * @return
      */
-    public Set<String> findGroupIds(String roleId) {
+    public Set<String> queryGroupIds(String roleId) {
         if (StringUtils.isBlank(roleId)) return Collections.emptySet();
         SysRoleGroup entity = new SysRoleGroup(roleId, null);
-        List<SysRoleGroup> list = this.getDao().findList(entity);
+        List<SysRoleGroup> list = this.getDao().queryList(entity);
         if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
         Set<String> ids = new HashSet<>();
         list.forEach(tmp -> ids.add(tmp.getGroupId()));
@@ -73,7 +73,7 @@ public class SysRoleGroupService {
     public void addRoleGroup(String roleId, String groupId) {
         if (StringUtils.isAnyBlank(roleId, groupId)) return;
         SysRoleGroup entity = new SysRoleGroup(roleId, groupId);
-        if (null != this.getDao().findOne(entity)) return;//已分配
+        if (null != this.getDao().queryOne(entity)) return;//已分配
         this.getDao().addBy(entity);
     }
 
@@ -108,6 +108,16 @@ public class SysRoleGroupService {
         if (StringUtils.isAnyBlank(roleId, groupId)) return;
         SysRoleGroup entity = new SysRoleGroup(roleId, groupId);
         this.getDao().removeBy(entity);
+    }
+
+    /**
+     * 删除关系
+     * @param roleId
+     * @param groupIds
+     */
+    public void delBy(String roleId, Set<String> groupIds) {
+        if (StringUtils.isBlank(roleId) || CollectionUtils.isEmpty(groupIds)) return;
+        this.roleRepo.removeGroup(roleId, groupIds);
     }
 
     /**

@@ -25,47 +25,6 @@ public class SysFilePmsnService {
     }
 
     /**
-     * 查找关系
-     * @param pmsnId
-     * @return
-     */
-    public Set<String> findFileIds(String pmsnId) {
-        if (StringUtils.isBlank(pmsnId)) return Collections.emptySet();
-        List<SysFilePmsn> list = this.getDao().findList(new SysFilePmsn(null, pmsnId));
-        if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
-        Set<String> ids = new HashSet<>();
-        list.forEach(tmp -> ids.add(tmp.getFileId()));
-        return ids;
-    }
-
-    /**
-     * 查找关系
-     * @param fileId
-     * @return
-     */
-    public Set<String> findPmsnIds(String fileId) {
-        if (StringUtils.isBlank(fileId)) return Collections.emptySet();
-        List<SysFilePmsn> list = this.getDao().findList(new SysFilePmsn(fileId, null));
-        if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
-        Set<String> ids = new HashSet<>();
-        list.forEach(tmp -> ids.add(tmp.getPmsnId()));
-        return ids;
-    }
-
-    /**
-     * 添加或解除关系
-     * @param fileId
-     * @param addPmsnIds
-     * @param delPmsnIds
-     */
-    @Transactional
-    public void addAndDel(String fileId, Set<String> addPmsnIds, Set<String> delPmsnIds) {
-        if (StringUtils.isBlank(fileId)) return;
-        if (CollectionUtils.isNotEmpty(delPmsnIds)) delPmsnIds.forEach(tmp -> this.delBy(fileId, tmp));
-        if (CollectionUtils.isNotEmpty(addPmsnIds)) addPmsnIds.forEach(tmp -> this.addRlt(fileId, tmp));
-    }
-
-    /**
      * 添加关系
      * @param fileId
      * @param pmsnId
@@ -73,7 +32,7 @@ public class SysFilePmsnService {
     public void addRlt(String fileId, String pmsnId) {
         if (StringUtils.isAnyBlank(fileId, pmsnId)) return;
         SysFilePmsn entity = new SysFilePmsn(fileId, pmsnId);
-        if (null != this.getDao().findOne(entity)) return;//已分配
+        if (null != this.getDao().queryOne(entity)) return;//已分配
         this.getDao().addBy(entity);
     }
 
@@ -100,11 +59,24 @@ public class SysFilePmsnService {
     }
 
     /**
+     * 更新关系
+     * @param fileId
+     * @param addPmsnIds
+     * @param delPmsnIds
+     */
+    @Transactional
+    public void updateRlt(String fileId, Set<String> addPmsnIds, Set<String> delPmsnIds) {
+        if (StringUtils.isBlank(fileId)) return;
+        if (CollectionUtils.isNotEmpty(delPmsnIds)) delPmsnIds.forEach(tmp -> this.deleteBy(fileId, tmp));
+        if (CollectionUtils.isNotEmpty(addPmsnIds)) addPmsnIds.forEach(tmp -> this.addRlt(fileId, tmp));
+    }
+
+    /**
      * 删除关系
      * @param fileId
      * @param pmsnId
      */
-    public void delBy(String fileId, String pmsnId) {
+    public void deleteBy(String fileId, String pmsnId) {
         if (StringUtils.isAnyBlank(fileId, pmsnId)) return;
         this.getDao().removeBy(new SysFilePmsn(fileId, pmsnId));
     }
@@ -113,7 +85,7 @@ public class SysFilePmsnService {
      * 删除关系
      * @param fileId
      */
-    public void delByFileId(String fileId) {
+    public void deleteByFileId(String fileId) {
         if (StringUtils.isBlank(fileId)) return;
         this.getDao().removeBy(new SysFilePmsn(fileId, null));
     }
@@ -122,9 +94,46 @@ public class SysFilePmsnService {
      * 删除关系
      * @param pmsnId
      */
-    public void delByPmsnId(String pmsnId) {
+    public void deleteByPmsnId(String pmsnId) {
         if (StringUtils.isBlank(pmsnId)) return;
         this.getDao().removeBy(new SysFilePmsn(null, pmsnId));
     }
 
+    /**
+     * 查找关系
+     * @param pmsnId
+     * @return
+     */
+    public Set<String> queryFileIds(String pmsnId) {
+        if (StringUtils.isBlank(pmsnId)) return Collections.emptySet();
+        List<SysFilePmsn> list = this.getDao().queryList(new SysFilePmsn(null, pmsnId));
+        if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
+        Set<String> ids = new HashSet<>();
+        list.forEach(tmp -> ids.add(tmp.getFileId()));
+        return ids;
+    }
+
+    /**
+     * 查找关系
+     * @param fileId
+     * @return
+     */
+    public Set<String> queryPmsnIds(String fileId) {
+        if (StringUtils.isBlank(fileId)) return Collections.emptySet();
+        List<SysFilePmsn> list = this.getDao().queryList(new SysFilePmsn(fileId, null));
+        if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
+        Set<String> ids = new HashSet<>();
+        list.forEach(tmp -> ids.add(tmp.getPmsnId()));
+        return ids;
+    }
+
+    /**
+     * 插叙外键
+     * @param fileId
+     * @return
+     */
+    public SysFilePmsn queryByFileId(String fileId) {
+        if (null == fileId) return null;
+        return this.getDao().queryOne(new SysFilePmsn(fileId, null));
+    }
 }

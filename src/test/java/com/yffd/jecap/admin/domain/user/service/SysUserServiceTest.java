@@ -3,11 +3,10 @@ package com.yffd.jecap.admin.domain.user.service;
 import com.alibaba.fastjson.JSON;
 import com.yffd.jecap.admin.BaseTest;
 import com.yffd.jecap.admin.domain.user.entity.SysUser;
+import com.yffd.jecap.common.base.page.PageData;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
 
 @Slf4j
 public class SysUserServiceTest extends BaseTest {
@@ -17,10 +16,10 @@ public class SysUserServiceTest extends BaseTest {
     @Test
     public void addTest() {
         SysUser entity = new SysUser();
-        entity.setLoginName("admin");
-        entity.setLoginPwd("111111");
+        entity.setAcntName("admin");
+        entity.setAcntPwd("111111");
         entity.setUserName("admin");
-        this.sysUserService.addBy(entity);
+        this.sysUserService.add(entity);
     }
 
     @Test
@@ -40,7 +39,7 @@ public class SysUserServiceTest extends BaseTest {
     public void getListTest() {
         SysUser entity = new SysUser();
         entity.setUserName("李四");
-        List<SysUser> list = this.sysUserService.findList(entity);
-        System.out.println(JSON.toJSONString(list));
+        PageData<SysUser> data = this.sysUserService.queryPage(entity, 1, 10);
+        System.out.println(JSON.toJSONString(data));
     }
 }

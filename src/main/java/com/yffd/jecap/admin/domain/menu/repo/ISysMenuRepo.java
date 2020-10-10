@@ -11,5 +11,5 @@ public interface ISysMenuRepo {
     IBaseDao<SysMenu> getMenuDao();
     IBaseDao<SysMenuPmsn> getMenuPmsnDao();
 
-    List<SysMenu> findByPath(String path);
+    List<SysMenu> queryByPath(String path);
 }

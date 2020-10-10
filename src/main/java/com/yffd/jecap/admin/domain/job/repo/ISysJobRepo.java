@@ -7,4 +7,5 @@ public interface ISysJobRepo {
 
     ISysJobDao getJobDao();
     ISysJobOrgDao getJobOrgDao();
+
 }

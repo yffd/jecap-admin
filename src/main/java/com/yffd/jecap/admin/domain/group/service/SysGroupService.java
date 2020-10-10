@@ -1,9 +1,10 @@
 package com.yffd.jecap.admin.domain.group.service;
 
-import com.yffd.jecap.admin.domain.exception.AdminException;
+import com.yffd.jecap.admin.domain.exception.SysException;
 import com.yffd.jecap.admin.domain.group.entity.SysGroup;
 import com.yffd.jecap.admin.domain.group.repo.ISysGroupRepo;
 import com.yffd.jecap.common.base.dao.IBaseDao;
+import com.yffd.jecap.common.base.page.PageData;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,9 +18,9 @@ public class SysGroupService {
     }
 
     public void add(SysGroup group) {
-        if (null == group || StringUtils.isBlank(group.getGroupName())) throw AdminException.cast("组名称不能为空").prompt();
+        if (null == group || StringUtils.isBlank(group.getGroupName())) throw SysException.cast("组名称不能为空").prompt();
         if (StringUtils.isNotBlank(group.getGroupCode()) && this.existByGroupCode(group.getGroupCode())) {
-            throw AdminException.cast(String.format("组编号【%s】已存在", group.getGroupCode())).prompt();
+            throw SysException.cast(String.format("组编号【%s】已存在", group.getGroupCode())).prompt();
         }
         this.getDao().addBy(group);
     }
@@ -27,31 +28,35 @@ public class SysGroupService {
     public void updateById(SysGroup group) {
         if (null == group || StringUtils.isBlank(group.getId())) return;
         if (StringUtils.isNotBlank(group.getGroupCode())) {
-            SysGroup entity = this.findByGroupCode(group.getGroupCode());
+            SysGroup entity = this.queryByGroupCode(group.getGroupCode());
             if (null != entity && !entity.getId().equals(group.getId())) {
-                throw AdminException.cast(String.format("组编号【%s】已存在", group.getGroupCode())).prompt();
+                throw SysException.cast(String.format("组编号【%s】已存在", group.getGroupCode())).prompt();
             }
         }
         this.getDao().modifyById(group);
     }
 
-    public void delById(String groupId) {
+    public void deleteById(String groupId) {
         if (StringUtils.isBlank(groupId)) return;
         this.getDao().removeById(groupId);
     }
 
     public boolean existByGroupCode(String groupCode) {
-        return null != this.findByGroupCode(groupCode);
+        return null != this.queryByGroupCode(groupCode);
     }
 
-    public SysGroup findByGroupCode(String groupCode) {
+    public SysGroup queryByGroupCode(String groupCode) {
         if (StringUtils.isBlank(groupCode)) return null;
-        return this.getDao().findOne(new SysGroup(null, groupCode));
+        return this.getDao().queryOne(new SysGroup(null, groupCode));
     }
 
-    public SysGroup findById(String groupId) {
+    public SysGroup queryById(String groupId) {
         if (StringUtils.isBlank(groupId)) return null;
-        return this.getDao().findById(groupId);
+        return this.getDao().queryById(groupId);
+    }
+
+    public PageData<SysGroup> queryPage(SysGroup group, int pageNum, int pageSize) {
+        return this.getDao().queryPage(group, pageNum, pageSize);
     }
 
 }

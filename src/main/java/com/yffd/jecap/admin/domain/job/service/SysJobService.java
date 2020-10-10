@@ -1,13 +1,13 @@
 package com.yffd.jecap.admin.domain.job.service;
 
-import com.yffd.jecap.admin.domain.exception.AdminException;
+import com.yffd.jecap.admin.domain.exception.SysException;
 import com.yffd.jecap.admin.domain.job.entity.SysJob;
 import com.yffd.jecap.admin.domain.job.repo.ISysJobRepo;
 import com.yffd.jecap.admin.infrastructure.dao.job.ISysJobDao;
+import com.yffd.jecap.common.base.page.PageData;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SysJobService {
@@ -20,9 +20,9 @@ public class SysJobService {
     }
 
     public void add(SysJob job) {
-        if (null == job || StringUtils.isBlank(job.getJobName())) throw AdminException.cast("岗位名称不能为空").prompt();
+        if (null == job || StringUtils.isBlank(job.getJobName())) throw SysException.cast("岗位名称不能为空").prompt();
         if (StringUtils.isNotBlank(job.getJobCode()) && this.existByJobCode(job.getJobCode())) {
-            throw AdminException.cast(String.format("岗位编号【%s】已存在", job.getJobCode())).prompt();
+            throw SysException.cast(String.format("岗位编号【%s】已存在", job.getJobCode())).prompt();
         }
         this.getDao().addBy(job);
     }
@@ -32,17 +32,24 @@ public class SysJobService {
         if (StringUtils.isNotBlank(job.getJobCode())) {
             SysJob entity = this.findByJobCode(job.getJobCode());
             if (null != entity && !entity.getId().equals(job.getId())) {
-                throw AdminException.cast(String.format("岗位编号【%s】已存在", job.getJobCode())).prompt();
+                throw SysException.cast(String.format("岗位编号【%s】已存在", job.getJobCode())).prompt();
             }
         }
         this.getDao().modifyById(job);
     }
 
-    @Transactional
-    public void delById(String jobId) {
+    public void deleteById(String jobId) {
         if (StringUtils.isBlank(jobId)) return;
         this.getDao().deleteById(jobId);
-        this.jobOrgService.delByJobId(jobId);//删除关联关系
+    }
+
+    public SysJob queryById(String jobId) {
+        if (StringUtils.isBlank(jobId)) return null;
+        return this.getDao().queryById(jobId);
+    }
+
+    public PageData<SysJob> queryPage(SysJob job, int pageNum, int pageSize) {
+        return this.getDao().queryPage(job, pageNum, pageSize);
     }
 
     public boolean existByJobCode(String jobCode) {
@@ -53,6 +60,6 @@ public class SysJobService {
         if (StringUtils.isBlank(jobCode)) return null;
         SysJob entity = new SysJob();
         entity.setJobCode(jobCode);
-        return this.getDao().findOne(entity);
+        return this.getDao().queryOne(entity);
     }
 }

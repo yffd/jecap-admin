@@ -2,7 +2,7 @@ package com.yffd.jecap.admin.domain.area.service;
 
 import com.yffd.jecap.admin.domain.area.entity.SysAreaAddress;
 import com.yffd.jecap.admin.domain.area.repo.ISysAreaRepo;
-import com.yffd.jecap.admin.domain.exception.AdminException;
+import com.yffd.jecap.admin.domain.exception.SysException;
 import com.yffd.jecap.common.base.dao.IBaseDao;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ public class SysAreaAddressService {
 
     public void add(SysAreaAddress address) {
         if (null == address || StringUtils.isAnyBlank(address.getAreaId(), address.getAddress()))
-            throw AdminException.cast("区域ID | 详细地址 不能为空").prompt();
+            throw SysException.cast("区域ID | 详细地址 不能为空").prompt();
         this.getDao().addBy(address);
     }
 
@@ -42,16 +42,16 @@ public class SysAreaAddressService {
         this.getDao().removeBy(address);
     }
 
-    public SysAreaAddress findById(String addressId) {
+    public SysAreaAddress queryById(String addressId) {
         if (StringUtils.isBlank(addressId)) return null;
-        return this.getDao().findById(addressId);
+        return this.getDao().queryById(addressId);
     }
 
-    public List<SysAreaAddress> findByAreaId(String areaId) {
+    public List<SysAreaAddress> queryByAreaId(String areaId) {
         if (StringUtils.isBlank(areaId)) return Collections.emptyList();
         SysAreaAddress address = new SysAreaAddress();
         address.setAreaId(areaId);
-        return this.getDao().findList(address);
+        return this.getDao().queryList(address);
     }
 
 }

@@ -19,7 +19,7 @@ public class SysUserLoginService {
 
     public void save(SysUserLogin entity) {
         if (null == entity || StringUtils.isBlank(entity.getUserId())) return;
-        if (null != this.getDao().findById(entity.getUserId())) {
+        if (null != this.getDao().queryById(entity.getUserId())) {
             this.updateByUserId(entity);//更新
         } else {
             this.getDao().addBy(entity);//添加
@@ -38,11 +38,11 @@ public class SysUserLoginService {
         this.getDao().removeById(id);
     }
 
-    public SysUserLogin findByUserId(String userId) {
+    public SysUserLogin queryByUserId(String userId) {
         if (StringUtils.isBlank(userId)) return null;
         SysUserLogin entity = new SysUserLogin();
         entity.setUserId(userId);
-        return (SysUserLogin) this.getDao().findOne(entity);
+        return (SysUserLogin) this.getDao().queryOne(entity);
     }
 
 

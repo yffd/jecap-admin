@@ -27,9 +27,9 @@ public class SysJobOrgService {
      * @param orgId
      * @return
      */
-    public Set<String> findJobIds(String orgId) {
+    public Set<String> queryJobIds(String orgId) {
         if (StringUtils.isBlank(orgId)) return Collections.emptySet();
-        List<SysJobOrg> list = this.getDao().findList(new SysJobOrg(null, orgId));
+        List<SysJobOrg> list = this.getDao().queryList(new SysJobOrg(null, orgId));
         if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
         Set<String> ids = new HashSet<>();
         list.forEach(tmp -> ids.add(tmp.getJobId()));
@@ -41,9 +41,9 @@ public class SysJobOrgService {
      * @param jobId
      * @return
      */
-    public Set<String> findOrgIds(String jobId) {
+    public Set<String> queryOrgIds(String jobId) {
         if (StringUtils.isBlank(jobId)) return Collections.emptySet();
-        List<SysJobOrg> list = this.getDao().findList(new SysJobOrg(jobId, null));
+        List<SysJobOrg> list = this.getDao().queryList(new SysJobOrg(jobId, null));
         if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
         Set<String> ids = new HashSet<>();
         list.forEach(tmp -> ids.add(tmp.getOrgId()));
@@ -71,7 +71,7 @@ public class SysJobOrgService {
     public void addJobOrg(String jobId, String orgId) {
         if (StringUtils.isAnyBlank(jobId, orgId)) return;
         SysJobOrg entity = new SysJobOrg(jobId, orgId);
-        if (null != this.getDao().findOne(entity)) return;//已分配
+        if (null != this.getDao().queryOne(entity)) return;//已分配
         this.getDao().addBy(entity);
     }
 

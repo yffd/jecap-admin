@@ -11,5 +11,5 @@ public interface ISysDictRepo {
     IBaseDao<SysDict> getDictDao();
     IBaseDao<SysDictProps> getDictPropsDao();
 
-    List<SysDict> findByPath(String path);
+    List<SysDict> queryByPath(String path);
 }

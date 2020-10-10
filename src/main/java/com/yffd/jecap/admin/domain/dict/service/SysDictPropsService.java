@@ -2,7 +2,7 @@ package com.yffd.jecap.admin.domain.dict.service;
 
 import com.yffd.jecap.admin.domain.dict.entity.SysDictProps;
 import com.yffd.jecap.admin.domain.dict.repo.ISysDictRepo;
-import com.yffd.jecap.admin.domain.exception.AdminException;
+import com.yffd.jecap.admin.domain.exception.SysException;
 import com.yffd.jecap.common.base.dao.IBaseDao;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ public class SysDictPropsService {
 
     public void add(SysDictProps props) {
         if (null == props || StringUtils.isAnyBlank(props.getDictId(), props.getPropsName()))
-            throw AdminException.cast("字典ID | 属性名称 不能为空").prompt();
+            throw SysException.cast("字典ID | 属性名称 不能为空").prompt();
         this.getDao().addBy(props);
     }
 
@@ -42,16 +42,16 @@ public class SysDictPropsService {
         this.getDao().removeBy(props);
     }
 
-    public SysDictProps findById(String propsId) {
+    public SysDictProps queryById(String propsId) {
         if (StringUtils.isBlank(propsId)) return null;
-        return this.getDao().findById(propsId);
+        return this.getDao().queryById(propsId);
     }
 
-    public List<SysDictProps> findByDictId(String dictId) {
+    public List<SysDictProps> queryByDictId(String dictId) {
         if (StringUtils.isBlank(dictId)) return Collections.emptyList();
         SysDictProps props = new SysDictProps();
         props.setDictId(dictId);
-        return this.getDao().findList(props);
+        return this.getDao().queryList(props);
     }
 
 }

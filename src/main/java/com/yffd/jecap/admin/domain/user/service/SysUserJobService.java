@@ -29,10 +29,10 @@ public class SysUserJobService {
      * @param jobId
      * @return
      */
-    public Set<String> findUserIds(String jobId) {
+    public Set<String> queryUserIds(String jobId) {
         if (StringUtils.isBlank(jobId)) return Collections.emptySet();
         SysUserJob entity = new SysUserJob(null, jobId);
-        List<SysUserJob> list = this.getDao().findList(entity);
+        List<SysUserJob> list = this.getDao().queryList(entity);
         if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
         Set<String> ids = new HashSet<>();
         list.forEach(tmp -> ids.add(tmp.getUserId()));
@@ -44,10 +44,10 @@ public class SysUserJobService {
      * @param userId
      * @return
      */
-    public Set<String> findJobIds(String userId) {
+    public Set<String> queryJobIds(String userId) {
         if (StringUtils.isBlank(userId)) return Collections.emptySet();
         SysUserJob entity = new SysUserJob(userId, null);
-        List<SysUserJob> list = this.getDao().findList(entity);
+        List<SysUserJob> list = this.getDao().queryList(entity);
         if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
         Set<String> ids = new HashSet<>();
         list.forEach(tmp -> ids.add(tmp.getJobId()));
@@ -64,7 +64,7 @@ public class SysUserJobService {
     public void addAndDel(String userId, Set<String> addJobIds, Set<String> delJobIds) {
         if (StringUtils.isBlank(userId)) return;
         if (CollectionUtils.isNotEmpty(delJobIds)) delJobIds.forEach(jobId -> this.delBy(userId, jobId));
-        if (CollectionUtils.isNotEmpty(addJobIds)) addJobIds.forEach(jobId -> this.addUserGroup(userId, jobId));
+        if (CollectionUtils.isNotEmpty(addJobIds)) addJobIds.forEach(jobId -> this.addUserJob(userId, jobId));
     }
 
     /**
@@ -72,10 +72,10 @@ public class SysUserJobService {
      * @param userId
      * @param jobId
      */
-    public void addUserGroup(String userId, String jobId) {
+    public void addUserJob(String userId, String jobId) {
         if (StringUtils.isAnyBlank(userId, jobId)) return;
         SysUserJob entity = new SysUserJob(userId, jobId);
-        if (null != this.getDao().findOne(entity)) return;//已分配
+        if (null != this.getDao().queryOne(entity)) return;//已分配
         this.getDao().addBy(entity);
     }
 
@@ -85,9 +85,9 @@ public class SysUserJobService {
      * @param jobIds
      */
     @Transactional
-    public void addUserGroup(String userId, Set<String> jobIds) {
+    public void addUserJob(String userId, Set<String> jobIds) {
         if (CollectionUtils.isEmpty(jobIds)) return;
-        jobIds.forEach(jobId -> this.addUserGroup(userId, jobId));
+        jobIds.forEach(jobId -> this.addUserJob(userId, jobId));
     }
 
     /**
@@ -96,9 +96,9 @@ public class SysUserJobService {
      * @param userId
      */
     @Transactional
-    public void addUserGroup(Set<String> jobIds, String userId) {
+    public void addUserJob(Set<String> jobIds, String userId) {
         if (CollectionUtils.isEmpty(jobIds)) return;
-        jobIds.forEach(jobId -> this.addUserGroup(jobId, userId));
+        jobIds.forEach(jobId -> this.addUserJob(jobId, userId));
     }
 
     /**
@@ -110,6 +110,16 @@ public class SysUserJobService {
         if (StringUtils.isAnyBlank(userId, jobId)) return;
         SysUserJob entity = new SysUserJob(userId, jobId);
         this.getDao().removeBy(entity);
+    }
+
+    /**
+     * 删除关系
+     * @param userId
+     * @param jobIds
+     */
+    public void delBy(String userId, Set<String> jobIds) {
+        if (StringUtils.isBlank(userId) || CollectionUtils.isEmpty(jobIds)) return;
+        this.userRepo.removeJob(userId, jobIds);
     }
 
     /**

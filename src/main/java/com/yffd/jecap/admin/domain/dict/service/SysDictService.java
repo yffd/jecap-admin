@@ -4,7 +4,7 @@ import com.yffd.jecap.admin.domain.constant.AdminConsts;
 import com.yffd.jecap.admin.domain.dict.entity.SysDict;
 import com.yffd.jecap.admin.domain.dict.repo.ISysDictRepo;
 import com.yffd.jecap.admin.domain.dict.valobj.SysDictTree;
-import com.yffd.jecap.admin.domain.exception.AdminException;
+import com.yffd.jecap.admin.domain.exception.SysException;
 import com.yffd.jecap.common.base.dao.IBaseDao;
 import com.yffd.jecap.common.base.exception.DataExistException;
 import org.apache.commons.collections4.CollectionUtils;
@@ -31,8 +31,8 @@ public class SysDictService {
      * 查询所有树
      * @return
      */
-    public List<SysDictTree> findTree() {
-        List<SysDict> list = this.getDao().findList(new SysDict());
+    public List<SysDictTree> queryTree() {
+        List<SysDict> list = this.getDao().queryList(new SysDict());
         SysDictTree tree = SysDictTree.buildTree(list);
         if (null == tree) return Collections.EMPTY_LIST;
         return tree.getChildren();
@@ -40,22 +40,26 @@ public class SysDictService {
 
     /**
      * 查询单棵树
-     * @param orgId
+     * @param dictId
      * @return
      */
-    public SysDictTree findTree(String orgId) {
-        if (StringUtils.isBlank(orgId)) return null;
-        SysDict entity = this.getDao().findById(orgId);
+    public SysDictTree queryTree(String dictId) {
+        if (StringUtils.isBlank(dictId)) return null;
+        SysDict entity = this.getDao().queryById(dictId);
         if (null == entity) return null;
         String path = entity.getPath();
         if (StringUtils.isBlank(path)) path = entity.getId();
-        List<SysDict> children = this.dictRepo.findByPath(path);
+        List<SysDict> children = this.dictRepo.queryByPath(path);
         return SysDictTree.buildTree(children, entity);
     }
 
+    public SysDict queryById(String dictId) {
+        if (StringUtils.isBlank(dictId)) return null;
+        return this.getDao().queryById(dictId);
+    }
 
     public void add(SysDict dict) {
-        if (null == dict || StringUtils.isBlank(dict.getItemCode())) throw AdminException.cast("编号不能为空");
+        if (null == dict || StringUtils.isBlank(dict.getItemCode())) throw SysException.cast("编号不能为空");
         if (this.existByItemCode(dict.getItemCode())) throw DataExistException.cast("编号已存在");
         this.getDao().addBy(dict);
     }
@@ -71,7 +75,7 @@ public class SysDictService {
      * @param dict
      */
     public void addRoot(SysDict dict) {
-        if (null == dict || StringUtils.isBlank(dict.getItemCode())) throw AdminException.cast("编号不能为空");
+        if (null == dict || StringUtils.isBlank(dict.getItemCode())) throw SysException.cast("编号不能为空");
         if (this.existByItemCode(dict.getItemCode())) throw DataExistException.cast("编号已存在");
         dict.setPid(AdminConsts.DEF_TREE_ROOT_ID);
         this.getDao().addBy(dict);
@@ -83,10 +87,10 @@ public class SysDictService {
      */
     @Transactional
     public void addChild(SysDict dict) {
-        if (null == dict || StringUtils.isBlank(dict.getItemCode())) throw AdminException.cast("编号不能为空");
+        if (null == dict || StringUtils.isBlank(dict.getItemCode())) throw SysException.cast("编号不能为空");
         if (this.existByItemCode(dict.getItemCode())) throw DataExistException.cast("编号已存在");
-        SysDict parent = this.getDao().findById(dict.getPid());
-        if (null == parent) throw AdminException.cast("父ID不存在");
+        SysDict parent = this.getDao().queryById(dict.getPid());
+        if (null == parent) throw SysException.cast("父ID不存在");
         if (StringUtils.isBlank(parent.getPath())) {
             dict.setPath(parent.getId());
         } else {
@@ -103,9 +107,9 @@ public class SysDictService {
         if (null == dict || StringUtils.isBlank(dict.getId())) return;
         dict.setPid(null);//父ID不可修改
         if (StringUtils.isNotBlank(dict.getItemCode())) {
-            SysDict entity = this.findByItemCode(dict.getItemCode());
+            SysDict entity = this.queryByItemCode(dict.getItemCode());
             if (null != entity && !entity.getId().equals(dict.getId())) {
-                throw AdminException.cast(String.format("编号【%s】已存在", dict.getItemCode())).prompt();
+                throw SysException.cast(String.format("编号【%s】已存在", dict.getItemCode())).prompt();
             }
         }
         this.getDao().modifyById(dict);
@@ -119,27 +123,27 @@ public class SysDictService {
     @Transactional
     public void updateById(SysDict dict, String pid) {
         if (null == dict || StringUtils.isBlank(dict.getId())) return;
-        SysDict curNode = this.getDao().findById(dict.getId());
+        SysDict curNode = this.getDao().queryById(dict.getId());
         if (null == curNode) return;
         if (StringUtils.isBlank(pid)) {
             this.updateById(dict);//修改当前节点信息
         } else if (!pid.equals(curNode.getPid())) {//变更父节点
-            SysDict parent = this.getDao().findById(pid);
-            if (null == parent) throw AdminException.cast("父ID不存在");
+            SysDict parent = this.getDao().queryById(pid);
+            if (null == parent) throw SysException.cast("父ID不存在");
             String curPath = curNode.getPath();
             String newPath = StringUtils.isBlank(parent.getPath()) ? parent.getId() : parent.getPath() + "," + parent.getId();
             dict.setPath(newPath);
             dict.setPid(parent.getId());
             if (StringUtils.isNotBlank(dict.getItemCode())) {
-                SysDict entity = this.findByItemCode(dict.getItemCode());
+                SysDict entity = this.queryByItemCode(dict.getItemCode());
                 if (null != entity && !entity.getId().equals(dict.getId())) {
-                    throw AdminException.cast(String.format("编号【%s】已存在", dict.getItemCode())).prompt();
+                    throw SysException.cast(String.format("编号【%s】已存在", dict.getItemCode())).prompt();
                 }
             }
             this.getDao().modifyById(dict);//修改当前节点信息
 
             //更改子节点path、pid
-            List<SysDict> children = this.findChildrenByPath(curNode.getPath() + "," + curNode.getId());
+            List<SysDict> children = this.queryChildrenByPath(curNode.getPath() + "," + curNode.getId());
             if (CollectionUtils.isNotEmpty(children)) {
                 for (SysDict child : children) {
                     if (null == child || StringUtils.isBlank(child.getPath())) continue;
@@ -170,47 +174,47 @@ public class SysDictService {
         Set<String> dictIds = new HashSet<>();
         dictIds.add(dictId);//当前节点ID
         // 其子节点ID
-        Set<String> childrenIds = this.findChildrenIds(dictId);
+        Set<String> childrenIds = this.queryChildrenIds(dictId);
         dictIds.addAll(childrenIds);
         // 删除节点，以及子节点
         this.getDao().removeByIds(dictIds);
         this.dictPropsService.delByDictId(dictId);
     }
 
-    public Set<String> findChildrenIds(String dictId) {
-        List<SysDict> list = this.findChildren(dictId);
+    public Set<String> queryChildrenIds(String dictId) {
+        List<SysDict> list = this.queryChildren(dictId);
         if (CollectionUtils.isEmpty(list)) return Collections.EMPTY_SET;
         Set<String> ids = new HashSet<>();
         list.forEach(tmp -> ids.add(tmp.getId()));
         return ids;
     }
 
-    public List<SysDict> findChildren(String dictId) {
+    public List<SysDict> queryChildren(String dictId) {
         if (StringUtils.isBlank(dictId)) return Collections.EMPTY_LIST;
-        SysDict entity = this.getDao().findById(dictId);
+        SysDict entity = this.getDao().queryById(dictId);
         if (null == entity || StringUtils.isBlank(entity.getPath())) return Collections.EMPTY_LIST;
-        return this.dictRepo.findByPath(entity.getPath() + "," + entity.getId());
+        return this.dictRepo.queryByPath(entity.getPath() + "," + entity.getId());
     }
 
-    public List<SysDict> findChildrenByPath(String path) {
+    public List<SysDict> queryChildrenByPath(String path) {
         if (StringUtils.isBlank(path)) return Collections.EMPTY_LIST;
-        return this.dictRepo.findByPath(path);
+        return this.dictRepo.queryByPath(path);
     }
 
-    public SysDict findByPid(String pid) {
+    public SysDict queryByPid(String pid) {
         if (StringUtils.isBlank(pid)) return null;
         SysDict entity = new SysDict();
         entity.setPid(pid);
-        return this.getDao().findOne(entity);
+        return this.getDao().queryOne(entity);
     }
 
-    public SysDict findByItemCode(String itemCode) {
+    public SysDict queryByItemCode(String itemCode) {
         if (StringUtils.isBlank(itemCode)) return null;
-        return this.getDao().findOne(new SysDict(null, itemCode));
+        return this.getDao().queryOne(new SysDict(null, itemCode));
     }
 
     public boolean existByItemCode(String itemCode) {
-        return null != this.findByItemCode(itemCode);
+        return null != this.queryByItemCode(itemCode);
     }
 
 }

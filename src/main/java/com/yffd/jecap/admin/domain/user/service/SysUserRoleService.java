@@ -29,10 +29,10 @@ public class SysUserRoleService {
      * @param userId
      * @return
      */
-    public Set<String> findRoleIds(String userId) {
+    public Set<String> queryRoleIds(String userId) {
         if (StringUtils.isBlank(userId)) return Collections.emptySet();
         SysUserRole entity = new SysUserRole(userId, null);
-        List<SysUserRole> list = this.getDao().findList(entity);
+        List<SysUserRole> list = this.getDao().queryList(entity);
         if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
         Set<String> ids = new HashSet<>();
         list.forEach(tmp -> ids.add(tmp.getRoleId()));
@@ -44,10 +44,10 @@ public class SysUserRoleService {
      * @param roleId
      * @return
      */
-    public Set<String> findUserIds(String roleId) {
+    public Set<String> queryUserIds(String roleId) {
         if (StringUtils.isBlank(roleId)) return Collections.emptySet();
         SysUserRole entity = new SysUserRole(null, roleId);
-        List<SysUserRole> list = this.getDao().findList(entity);
+        List<SysUserRole> list = this.getDao().queryList(entity);
         if (CollectionUtils.isEmpty(list)) return Collections.emptySet();
         Set<String> ids = new HashSet<>();
         list.forEach(tmp -> ids.add(tmp.getUserId()));
@@ -75,7 +75,7 @@ public class SysUserRoleService {
     public void addUserRole(String userId, String roleId) {
         if (StringUtils.isAnyBlank(userId, roleId)) return;
         SysUserRole entity = new SysUserRole(userId, roleId);
-        if (null != this.getDao().findOne(entity)) return;//已分配
+        if (null != this.getDao().queryOne(entity)) return;//已分配
         this.getDao().addBy(entity);
     }
 
@@ -109,6 +109,16 @@ public class SysUserRoleService {
     public void delBy(String userId, String roleId) {
         if (StringUtils.isAnyBlank(userId, roleId)) return;
         this.getDao().removeBy(new SysUserRole(userId, roleId));
+    }
+
+    /**
+     * 删除关系
+     * @param userId
+     * @param roleIds
+     */
+    public void delBy(String userId, Set<String> roleIds) {
+        if (StringUtils.isBlank(userId) || CollectionUtils.isEmpty(roleIds)) return;
+        this.userRepo.removeRole(userId, roleIds);
     }
 
     /**
